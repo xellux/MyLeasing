@@ -1,4 +1,6 @@
-﻿using Prism.Commands;
+﻿using MyLeasing.Common.Models;
+using MyLeasing.Common.Services;
+using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Navigation;
 using System;
@@ -9,15 +11,19 @@ namespace MyLeasing.Prism.ViewModels
 {
     public class LoginPageViewModel : ViewModelBase
     {
-
+        private readonly IApiService _apiService;
         private string _password;
         private bool _isRunning;
         private bool _isEnabled;
         private DelegateCommand _loginCommand;
-        public LoginPageViewModel(INavigationService navigationService) : base(navigationService)
+        public LoginPageViewModel(
+            INavigationService navigationService,
+            IApiService apiService) : base(navigationService)
         {
+            _apiService = apiService;
             Title = "Login";
             IsEnabled = true;
+            
         }
 
         public DelegateCommand LoginCommand => _loginCommand ?? (_loginCommand = new DelegateCommand(Login));
@@ -56,7 +62,28 @@ namespace MyLeasing.Prism.ViewModels
                 await App.Current.MainPage.DisplayAlert("Error", "You must enter a Password", "Accept");
                 return;
             }
+            IsRunning = true;
+            IsEnabled = false;
 
+            var request = new TokenRequest
+            {
+                Password = Password,
+                Username = Email
+            };
+
+            var url = App.Current.Resources["UrlAPI"].ToString();
+            var response = await _apiService.GetTokenAsync(url, "Account", "/CreateToken", request);
+            
+            IsRunning = false;
+            IsEnabled = true;
+
+            if(!response.IsSuccess)
+            {
+                await App.Current.MainPage.DisplayAlert("Error", "User or Password incorrect", "Accept");
+                Password = string.Empty;
+                return;
+            }
+                        
             await App.Current.MainPage.DisplayAlert("Ok", "Fuck yeah!!!", "Accept");
         }
 

@@ -1,7 +1,8 @@
-﻿using Prism;
-using Prism.Ioc;
+﻿using MyLeasing.Common.Services;
 using MyLeasing.Prism.ViewModels;
 using MyLeasing.Prism.Views;
+using Prism;
+using Prism.Ioc;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -30,6 +31,7 @@ namespace MyLeasing.Prism
         {
             containerRegistry.RegisterForNavigation<NavigationPage>();
             containerRegistry.RegisterForNavigation<LoginPage, LoginPageViewModel>();
+            containerRegistry.Register<IApiService, ApiService>();
         }
     }
 }
